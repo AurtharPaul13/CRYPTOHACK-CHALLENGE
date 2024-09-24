@@ -1,8 +1,8 @@
 - 👋 Hi, I’m @AurtharPaul13
 
 - 👀 I’m interested in Ethical Hacking.
-- 🌱 I’m currently learning Cyber Security and som Hacking Techniques.
-- 📫 How to reach me through Mail - aurtharpaul@gmail.com
+- 🌱 I’m currently learning Cyber Security and some Hacking Techniques.
+- 📫 How to reach me - aurtharpaul@gmail.com
 - ⚡ Fun fact: ...Sports person and love to do solo trekking.
   
 
