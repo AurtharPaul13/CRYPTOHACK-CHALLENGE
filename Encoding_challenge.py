@@ -53,3 +53,14 @@ for i in range(0,101):
     }
 
     json_send(to_send)
+
+
+
+The most important of these three codes is 13377.py it details how the initial encoding was done on the server side. This will give you an idea how to effectively reverse each encoding.
+
+13377.py is essentially just the combination of all previous challenges. The actual hurdle is automating the request and response.The function decoder lists all the decoding processes needed to solve the puzzle.
+
+json_recv() handles the response given by the server so it’s an important part of your loop. The grayed out print functions are there if you want to see every request and response.
+
+One more thing to note is that I limited my loop range to 1–100 since the challenges specifies that you have to solve 100 levels before getting the flag. That’s also the reason for the lone json_recv() function after the for loop. It’s the “101st” response and will contain the flag
+
