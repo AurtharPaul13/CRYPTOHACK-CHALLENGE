@@ -1,52 +1,37 @@
-from Crypto.Util.Padding import pad
-
-IV = os.urandom(8)
-FLAG = ?
-
-def xor(a, b):
-    # xor 2 bytestrings, repeating the 2nd one if necessary
-    return bytes(x ^ y for x,y in zip(a, b * (1 + len(a) // len(b))))
-
-@chal.route('/triple_des/encrypt/<key>/<plaintext>/')
-def encrypt(key, plaintext):
-    try:
-        key = bytes.fromhex(key)
-        plaintext = bytes.fromhex(plaintext)
-        plaintext = xor(plaintext, IV)
-
-        cipher = DES3.new(key, DES3.MODE_ECB)
-        ciphertext = cipher.encrypt(plaintext)
-        ciphertext = xor(ciphertext, IV)
-
-        return {"ciphertext": ciphertext.hex()}
-
-    except ValueError as e:
-        return {"error": str(e)}
-
-@chal.route('/triple_des/encrypt_flag/<key>/')
-def encrypt_flag(key):
-    return encrypt(key, pad(FLAG.encode(), 8).hex())
-
 import requests
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad, unpad
-from Crypto.Util.number import long_to_bytes, bytes_to_long
+from pwn import *
+from json import loads
+from Crypto.Util.Padding import unpad
 
-def encrypt(key, plain):
-    url = "http://aes.cryptohack.org/triple_des/encrypt/"
-    url += key
-    url += "/"
-    url += plain.hex()
-    url += "/"
-    r = requests.get(url).json()
-    return bytes.fromhex(r["ciphertext"])
+def encrypt(key, pt):
+    key, pt = bytes.hex(key), bytes.hex(pt)
+    url = f"https://aes.cryptohack.org/triple_des/encrypt/{key}/{pt}/"
+    r = requests.get(url)
+    ct = (loads(r.text))['ciphertext']
+    return bytes.fromhex(ct)
 
 def encrypt_flag(key):
-    url = "http://aes.cryptohack.org/triple_des/encrypt_flag/"
-    r = requests.get(url + key + '/').json()
-    return bytes.fromhex(r["ciphertext"])
+    key = bytes.hex(key)
+    url = f"https://aes.cryptohack.org/triple_des/encrypt_flag/{key}/"
+    r = requests.get(url)
+    key = (loads(r.text))['ciphertext']
+    return bytes.fromhex(key)
 
-key = b'\x00'*8 + b'\xff'*8
-flag = encrypt_flag(key.hex())
-cipher = encrypt(key.hex(), flag)
-print(cipher)
+keys = [
+    b'\x00'*8 + b'\xff'*8,
+    b'\xff'*8 + b'\x00'*8,
+    b'\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01',
+    b'\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00\x01\x00'
+]
+for key in keys:
+    try:
+        enc = encrypt_flag(key)
+        flag = unpad(encrypt(key, enc), 8).decode()
+        print(flag)
+        break
+    except:
+        print(f'{key}: Error!!!')
+
+
+First we need to understand the 3DES.According to the diagram above, the function encrypt of DES3 will take the 32-byte key with key1 = key[:8], key2 = key[8:16], key3 = [16:24] (key2 != key1 != key3 otherwise will become DES). If the key is only 24-byte, key1 = key3.
+One more knowledge we need to use in this article. lock weak. The weak lock is the satisfying locks E(E(weak_key, plaintext)) = plaintext. Combined with 3DES encoding diagram ct = E(D(E(key, pt))), if replaced key = weak_key, pt = FLAGWe can restore the flag
