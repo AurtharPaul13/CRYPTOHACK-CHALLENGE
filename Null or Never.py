@@ -1,23 +1,3 @@
-from Crypto.PublicKey import RSA
-from Crypto.Util.number import bytes_to_long
-
-FLAG = b"crypto{???????????????????????????????????}"
-
-
-def pad100(msg):
-    return msg + b'\x00' * (100 - len(msg))
-
-
-key = RSA.generate(1024, e=3)
-n, e = key.n, key.e
-
-m = bytes_to_long(pad100(FLAG))
-c = pow(m, e, n)
-
-print(f"n = {n}")
-print(f"e = {e}")
-print(f"c = {c}")
-
 from Crypto.Util.number import bytes_to_long, long_to_bytes
 
 n = 95341235345618011251857577682324351171197688101180707030749869409235726634345899397258784261937590128088284421816891826202978052640992678267974129629670862991769812330793126662251062120518795878693122854189330426777286315442926939843468730196970939951374889986320771714519309125434348512571864406646232154103
@@ -39,3 +19,6 @@ for i in range(9, 93):
         break
     else:
         print('Not yet!!!')
+
+
+With e = 3, it seems that the song applies to Coppersmith is real. However, we need to analyze the text, m = flag + b'\x00' * (100 - len(flag)), that is, there will be 100 bytes. But the song is quite banana when not to tell us the length of the flag, it is imperative that we guess
