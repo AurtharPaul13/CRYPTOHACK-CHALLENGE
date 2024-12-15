@@ -25,3 +25,10 @@ c = pow(m, e, N)
 print(f'N = {hex(N)}')
 print(f'e = {hex(e)}')
 print(f'c = {hex(c)}')
+
+
+
+
+
+Posts for N We can’t have a factor, so we won’t mention that way here.
+If you look at the source code of the post, it’s easy to see that Weiner’s attack can’t be used. However, according to the reading source: https://www.ams.org/notices/199902/boneh.pdfWe know in a different way of attacking the case. d relatively small (Copy code but not understanding the nature so I have not written here)
