@@ -17,3 +17,6 @@ def sum(P, Q, E):
         x3 = (k**2 - x1 - x2) % Ep
         y3 = (k*(x1 - x3) - y1) % Ep
         return x3, y3
+
+
+First we need to code to calculate "total" two points.Then just count S(x; y) According to the request, the title is finished
