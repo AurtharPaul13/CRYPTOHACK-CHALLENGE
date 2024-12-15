@@ -1,18 +1,3 @@
-from Crypto.Cipher import PKCS1_OAEP
-from Crypto.PublicKey import RSA
-
-
-msg = "???"
-
-with open('21.pem') as f:
-    key = RSA.importKey(f.read())
-
-cipher = PKCS1_OAEP.new(key)
-ciphertext = cipher.encrypt(msg)
-
-with open('21.ciphertext', 'w') as f:
-    f.write(ciphertext.hex())
-
 from Crypto.PublicKey.RSA import import_key, construct
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Util.number import inverse, long_to_bytes as ltb
@@ -30,3 +15,12 @@ key = construct((n, e, d))
 cipher = PKCS1_OAEP.new(key)
 flag = cipher.decrypt(ltb(ct))
 print(flag)
+
+
+
+
+First, looking at the source code, we know the encryption process as follows:
+Tạo key -> PKCS1.encrypt -> Viết vào file ct
+From there, we also have the process of coding in the following steps:
+Đọc file ct, đọc và khôi phục key -> PKCS1.decrypt
+I have gained the value of n and and e Easy by reading files. 21.pem, to construct key I need more d. Fortunately, we can find it. d.
