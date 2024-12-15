@@ -1,62 +1,25 @@
-from Crypto.Cipher import AES
+import requests
+from json import loads
 
-
-KEY = ?
-FLAG = ?
-
-
-@chal.route('/symmetry/encrypt/<plaintext>/<iv>/')
 def encrypt(plaintext, iv):
-    plaintext = bytes.fromhex(plaintext)
-    iv = bytes.fromhex(iv)
-    if len(iv) != 16:
-        return {"error": "IV length must be 16"}
+    plaintext, iv = bytes.hex(plaintext), bytes.hex(iv)
+    url = f'https://aes.cryptohack.org/symmetry/encrypt/{plaintext}/{iv}/'
+    r = requests.get(url)
+    ct = (loads(r.text))['ciphertext']
+    return ct
 
-    cipher = AES.new(KEY, AES.MODE_OFB, iv)
-    encrypted = cipher.encrypt(plaintext)
-    ciphertext = encrypted.hex()
-
-    return {"ciphertext": ciphertext}
-
-
-@chal.route('/symmetry/encrypt_flag/')
 def encrypt_flag():
-    iv = os.urandom(16)
+    url = f'https://aes.cryptohack.org/symmetry/encrypt_flag'
+    r = requests.get(url)
+    enc = (loads(r.text))['ciphertext']
+    enc = bytes.fromhex(enc)
+    iv, ct = enc[:16], enc[16:]
+    return iv, ct
 
-    cipher = AES.new(KEY, AES.MODE_OFB, iv)
-    encrypted = cipher.encrypt(FLAG.encode())
-    ciphertext = iv.hex() + encrypted.hex()
-
-    return {"ciphertext": ciphertext}
-
-
-from Crypto.Cipher import AES
-
-
-KEY = ?
-FLAG = ?
+iv, ct = encrypt_flag()
+flag = bytes.fromhex(encrypt(ct, iv)).decode()
+print(flag)
 
 
-@chal.route('/symmetry/encrypt/<plaintext>/<iv>/')
-def encrypt(plaintext, iv):
-    plaintext = bytes.fromhex(plaintext)
-    iv = bytes.fromhex(iv)
-    if len(iv) != 16:
-        return {"error": "IV length must be 16"}
 
-    cipher = AES.new(KEY, AES.MODE_OFB, iv)
-    encrypted = cipher.encrypt(plaintext)
-    ciphertext = encrypted.hex()
-
-    return {"ciphertext": ciphertext}
-
-
-@chal.route('/symmetry/encrypt_flag/')
-def encrypt_flag():
-    iv = os.urandom(16)
-
-    cipher = AES.new(KEY, AES.MODE_OFB, iv)
-    encrypted = cipher.encrypt(FLAG.encode())
-    ciphertext = iv.hex() + encrypted.hex()
-
-    return {"ciphertext": ciphertext}
+we need to understand the coding and Decoding diagram of the mode OFB.It can be seen that the encryption process will become an code if we change the position of the Pi and and Ci. Therefore, the simple problem becomes to receive and send data back to the web
