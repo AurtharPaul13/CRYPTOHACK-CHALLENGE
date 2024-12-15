@@ -10,3 +10,7 @@ fn = p*(p-1)
 d = inverse(e, fn)
 pt = pow(ct, d, n)
 print(long_to_bytes(pt))
+
+
+Using http://www.factordb.com/, we found that n is a square number computed by a prime.
+Giving n = p^2 with p being a prime, the Euler's totient function works that: image Therefore, fn = p*(p-1)
