@@ -65,3 +65,13 @@ exported = key.publickey().export_key()
 with open("key.pem", 'wb') as f: f.write(exported) 
 with open('ciphertext.txt', 'w') as f:
     f.write(ciphertext.hex())
+
+
+
+
+I have two ways for the post.
+
+    Method 1: Use http://www.factordb.com/ to find trapdoor d From there, recover it. flag
+    Method 2: Analysis p and and q
+
+Method 2 is a way to attack in the direction: https://jix.one/not-even-coppersmiths-attack/
