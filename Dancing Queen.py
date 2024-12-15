@@ -78,3 +78,6 @@ if __name__ == '__main__':
     print(f"iv2 = '{iv2.hex()}'")
     print(f"msg_enc = '{msg_enc.hex()}'")
     print(f"flag_enc = '{flag_enc.hex()}'")
+
+
+First, I will analyze the source code of the post combined with osint. ChaCha20 is a line code of 20 rounds, faster AES. Because it's a line code, len(flag) = len(flag_enc) = 74.
