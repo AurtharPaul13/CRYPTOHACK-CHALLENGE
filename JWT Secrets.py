@@ -31,3 +31,6 @@ key = "secret"
 encoded = jwt.encode({"username":"admin","admin":True}, key, algorithm="HS256")
 
 print(encoded)
+
+
+Main advantage of JWTs as opposed to session ID is that JWTs live on the client side and it’s easier to scale. Different back end servers can authorize a single JWT instead of having to create multiple session object per server.
