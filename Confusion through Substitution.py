@@ -49,3 +49,8 @@ def sub_bytes(s, sbox=s_box):
             print(chr(sbox[s[i][j]]), end="")
 
 print(sub_bytes(state, sbox=inv_s_box))
+
+
+The word "confusion" derives from the theory of mathematician Claude Shannon in 1945, referring to the connection between the code and the key should be as complex as possible. When there is only a code, no one can know anything about the key. If a passcode has a weak "confusion", it will be easier to break down.
+The main purpose of building the S-box is to create code that is hard to be analyzed by linear functions.
+The question: Writing Function sub_bytes and transmit data a matrix state through an inverted S-box and restores the flag.
