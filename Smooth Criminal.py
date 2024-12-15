@@ -78,3 +78,7 @@ assert mul(G, n, E) == Q
 ss = mul(B, n, E)[0]
 flag = decrypt_flag(ss, iv, encrypted_flag)
 print(flag)
+
+
+After reading the source, I learned the equation of (E), school Fp, birth point G and value B It's Bob's public key. The point I get is in the file. ouput.txt That is Q = nG with n Random.
+I was in my hands. iv and and encrypted_flag, so there is a lack shared secret (ss) That is here. ss = nB. I need to find it again n, but according to the title is Smooth Criminal I guess it's a hint related to smooth prime. pThen the dlog algorithm will run faster.
