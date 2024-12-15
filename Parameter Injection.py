@@ -46,5 +46,9 @@ get = loads(r.recvuntil(b'}'))
 iv = get['iv']
 encrypted_flag = get['encrypted_flag']
 key = 1
+print(decrypt_flag(key, iv, encrypted_flag))
+
+
+In there, I need to get it. iv, encrypted_flag and and key. I'll be done man-in-the-middle attack It's here. Know that Alice will count key = pow(fake_B, a, p) So I will find a way to key Some I know in advance. I'll choose fake_B = 1 to key = 1, then just take iv and and encrypted_flag Go to the code is done.
 
 print(decrypt_flag(key, iv, encrypted_flag))
