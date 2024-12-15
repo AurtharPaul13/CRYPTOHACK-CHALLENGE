@@ -36,3 +36,9 @@ iv = '737561146ff8194f45290f5766ed6aba'
 ciphertext = '39c99bf2f0c14678d6a5416faef954b5893c316fc3c48622ba1fd6a9fe85f3dc72a29c394cf4bc8aff6a7b21cae8e12c'
 
 print(decrypt_flag(shared_secret, iv, ciphertext))
+
+
+We have to decrypt the challenge code.
+It is quite simple when I just need to fill in the value for the variables in the file. decrypt.py, in it ciphertext is encrypted_flag and and shared_secret is the encryption key according to the DH protocol.
+
+
