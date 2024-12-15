@@ -1,23 +1,3 @@
-from Crypto.Util.number import bytes_to_long, getPrime
-from secret import messages
-
-
-def RSA_encrypt(message):
-    m = bytes_to_long(message)
-    p = getPrime(1024)
-    q = getPrime(1024)
-    N = p * q
-    e = 3
-    c = pow(m, e, N)
-    return N, e, c
-
-
-for m in messages:
-    N, e, c = RSA_encrypt(m)
-    print(f"n = {N}")
-    print(f"e = {e}")
-    print(f"c = {c}")
-
 from Crypto.Util.number import long_to_bytes
 from itertools import combinations
 from gmpy2 import iroot
@@ -38,3 +18,9 @@ for i in triples:
     if(b'crypto' in flag):
         print(flag.decode())
         break
+
+
+
+Looking at the topic, we know that Johan needs to send the same message to all students, so the formula will be: c[i] = m[i]^e[i] (mod n[i]). There are 7 pairs here (c, n) It is said that this is the Hastad Broadcast Attack (a similar form of CRT: Chinese Remainder Theorem)
+I will choose each pair n and and c to solve the article, however, the source code shows Johan encoding each part in message, besides CRT requires at least 3 equations so we will select the trident from the list (n, c, e) was let to find out message Really. The total number of ways will be 7C3 = 35 way
+Code (using sage to save time rewriting functions crt)
