@@ -7,3 +7,6 @@ ct = 161367550346730604451454756189028938964941280347662098798775466019463375610
 d = inverse(e, n-1)
 pt = pow(ct, d, n)
 print(long_to_bytes(pt))
+
+
+With n being a prime, the totient of n should be n-1 since it counts all the numbers that are co-prime with n
