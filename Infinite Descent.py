@@ -1,29 +1,3 @@
-import random
-from Crypto.Util.number import bytes_to_long, isPrime
-
-FLAG = b"crypto{???????????????????}"
-
-
-def getPrimes(bitsize):
-    r = random.getrandbits(bitsize)
-    p, q = r, r
-    while not isPrime(p):
-        p += random.getrandbits(bitsize//4)
-    while not isPrime(q):
-        q += random.getrandbits(bitsize//8)
-    return p, q
-
-
-m = bytes_to_long(FLAG)
-p, q = getPrimes(2048)
-n = p * q
-e = 0x10001
-c = pow(m, e, n)
-
-print(f"n = {n}")
-print(f"e = {e}")
-print(f"c = {c}")
-
 from Crypto.Util.number import long_to_bytes, inverse, isPrime
 from sympy.ntheory.primetest import is_square
 from sympy import sqrt
@@ -49,3 +23,5 @@ d = inverse(e, (p-1)*(q-1))
 flag = long_to_bytes(pow(c, d, n))
 print(flag.decode())
 
+
+If the test runs the function getPrimes of source code, we will see two numbers. p and and q Pretty close together. This is also a sign that we can use Fermat's attack here
