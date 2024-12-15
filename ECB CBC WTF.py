@@ -1,33 +1,3 @@
-from Crypto.Cipher import AES
-
-
-KEY = ?
-FLAG = ?
-
-
-@chal.route('/ecbcbcwtf/decrypt/<ciphertext>/')
-def decrypt(ciphertext):
-    ciphertext = bytes.fromhex(ciphertext)
-
-    cipher = AES.new(KEY, AES.MODE_ECB)
-    try:
-        decrypted = cipher.decrypt(ciphertext)
-    except ValueError as e:
-        return {"error": str(e)}
-
-    return {"plaintext": decrypted.hex()}
-
-
-@chal.route('/ecbcbcwtf/encrypt_flag/')
-def encrypt_flag():
-    iv = os.urandom(16)
-
-    cipher = AES.new(KEY, AES.MODE_CBC, iv)
-    encrypted = cipher.encrypt(FLAG.encode())
-    ciphertext = iv.hex() + encrypted.hex()
-
-    return {"ciphertext": ciphertext}
-
 from pwn import xor
 
 ct = '46114097100b0e0fbdc0f0c3cb530ed403091e84ead0642081f1773557a176484bb32e1da722966127bc7f6868894dd6'
@@ -43,3 +13,7 @@ pt2 = '5c3d68b4dbb43b11b6ae561476805735'
 pt1 = xor(bytes.fromhex(pt1), iv)
 pt2 = xor(bytes.fromhex(pt2), block1)
 print(pt1.decode(), pt2.decode(), sep='')
+
+
+First, let’s take the value of ciphertext. First we need to transfer ciphertext It's a bytes. Notice ciphertext 48 in length, of which iv It’s the first 16 characters, so we’ll divide the following code into two. block1 and and block2.
+The idea of crypt is quite simple if you look at the CBC code-derreding scheme above. With iv I already have, besides the web also provides an ECB-made function (this function helps us bypass the lack of key) Our code will be as follows (codes are indirect rather than directly with the web)
