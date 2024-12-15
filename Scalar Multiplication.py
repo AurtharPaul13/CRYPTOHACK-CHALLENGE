@@ -27,3 +27,7 @@ def mul(P, n, E):
         Q = sum(Q, Q, E)
         n //=2
     return R
+
+
+Code for calculating aimlessly according to the accounted algorithm.Enter E and and P, n I found it. Q(9467; 2742)
+
