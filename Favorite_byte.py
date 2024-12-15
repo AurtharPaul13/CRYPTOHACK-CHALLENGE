@@ -9,3 +9,7 @@ for num in range(256):
     if flag.startswith("crypto"):
         print('FLAG: ',flag)
         print(num)  
+
+
+
+he given hex string was XORed to a single byte but we don’t know the value of the byte. The way that I approached this problem is to just brute force the string against byte value since it’s just 255
