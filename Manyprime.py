@@ -16,3 +16,7 @@ fn = 580642391898843191487404652150193463439642600155214610402815446275117822457
 d = inverse(e, fn)
 pt = pow(ct, d, n)
 print(long_to_bytes(pt))
+
+
+
+The difficulty is there are 30+ prime divisors of n so we will use sage to factorized n and compute its totient function
