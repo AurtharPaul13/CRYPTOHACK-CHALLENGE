@@ -1,30 +1,3 @@
-from Crypto.Util.number import getPrime, long_to_bytes, bytes_to_long, inverse
-import math
-from gmpy2 import next_prime
-
-FLAG = b"crypto{????????????????????????????????????????????????}"
-
-p = getPrime(1024)
-q = getPrime(1024)
-N = p*q
-phi = (p-1)*(q-1)
-e = 0x10001
-d = inverse(e, phi)
-
-my_key = (N, d)
-
-friends = 5
-friend_keys = [(N, getPrime(17)) for _ in range(friends)]
-
-cipher = bytes_to_long(FLAG)
-
-for key in friend_keys:
-    cipher = pow(cipher, key[1], key[0])
-
-print(f"My private key: {my_key}")
-print(f"My Friend's public keys: {friend_keys}")
-print(f"Encrypted flag: {cipher}")
-
 from Crypto.Util.number import long_to_bytes, inverse
 
 N = 21711308225346315542706844618441565741046498277716979943478360598053144971379956916575370343448988601905854572029635846626259487297950305231661109855854947494209135205589258643517961521594924368498672064293208230802441077390193682958095111922082677813175804775628884377724377647428385841831277059274172982280545237765559969228707506857561215268491024097063920337721783673060530181637161577401589126558556182546896783307370517275046522704047385786111489447064794210010802761708615907245523492585896286374996088089317826162798278528296206977900274431829829206103227171839270887476436899494428371323874689055690729986771
@@ -49,3 +22,8 @@ for i in pubexs:
 d = inverse(e, fn)
 pt = long_to_bytes(pow(ct, d, N))
 print(pt)
+
+
+
+From the description of the post, it is easy to see ct is calculated: ct = m^(e1*e2*e3*e4*e5) (mod N). I consider 5 of the e1*e2*e3*e4*e5 There are only a number of e, from which to solve the problem.
+Very lucky, number N Ours can be a factor. http://www.factordb.com/, we have code
