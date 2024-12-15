@@ -22,3 +22,12 @@ print(f"ct = {ct}")
 pt = pow(ct, d, n)
 decrypted = long_to_bytes(pt)
 assert decrypted == flag
+
+
+
+
+from Crypto.Util.number import long_to_bytes
+n, e, ct = ...
+print(long_to_bytes(ct))
+
+With e = 1, we can see that ct = m (mod n), however, ct is very small compared to n so it can be easily deduced that ct = m
