@@ -48,3 +48,6 @@ inv_shift_rows(state)
 for i in range(4):
     for j in range(4):
         print(chr(state[i][j]), end="")
+
+ShiftRows and MixColumns step together to create this "diffusion", ensuring that each bytes will affect other bytes in the state with only 2 code-geneuring rings.
+ShiftRows is the simplest way to transform in AES.MixColumns is more complicated because it performs the matrix between the column of the state matrix and a matrix for the previous in the Galois field. Therefore, each bytes of the column affects the entire bytes in the resulting column
