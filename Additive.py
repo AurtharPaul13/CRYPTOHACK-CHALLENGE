@@ -51,3 +51,21 @@ assert (g*a*b)%p == (B*a)%p == (A*b)%p # thêm assert cho ngầu
 key = (g*a*b)%p
 
 print(decrypt_flag(key, iv, encrypted))
+
+
+    I know the DH protocol is in the multi-worker group. (G, *) Create power and obtain the following maths:
+
+A = g^a (mod p)
+B = g^b (mod p)
+key = B^a = A^b = g^(a*b) (mod p)
+
+    So if the DH protocol is implemented in the community group (G, +) then the power of power will be transformed into multiplication and the consequences:
+
+A = g*a (mod p)
+B = g*b (mod p)
+key = A*b = B*a = g*a*b (mod p)
+
+    I can easily calculate. a, b by looking for the reverse element inverse in the mod p field and from there. key thui :smile_cat:, the formula is as follows:
+
+g*a = A (mod p) --> g = A*inverse(g) (mod p)
+g*b = B (mod p) --> g = B*inverse(g) (mod p)
