@@ -34,3 +34,15 @@ encrypted_flag = 'f60522a95bde87a9ff00dc2c3d99177019f625f3364188c1058183004506bf
 key = g ^ A ^ B
 
 print(decrypt_flag(key, iv, encrypted_flag))
+
+
+
+
+    Read the script a bit, first "server" will receive the parameters {p, g, A}. Next, the "server" will gene. {b, B, key} with b thuộc [0, (p-1)/2), B = (g xor b) % p and and key = (A xor b) % p Then return B. After confirming whether we want to decrypt or not, "server" will receive {iv, ciphertext} and returned plaintext
+    For the output I received, I need to find again. key to code. Since the code performs a commutable xor, I try:
+
+b = (g ^ B) % p
+key = (A ^ b) % p
+Trial: key = g ^ A ^ B
+
+    And try to solve the flag:
