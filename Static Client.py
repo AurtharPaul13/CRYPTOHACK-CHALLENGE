@@ -51,3 +51,7 @@ fake_B = loads(r.recvuntil(b'}'))['B']
 shared_secret = int(fake_B, 16)
 
 print(decrypt_flag(shared_secret, iv_A, encrypted_A))
+
+
+After nc socket.cryptohack.org 13373, I get the parameters {p, g, A, B, iv_A, encrypted_A}, continue to send parameters {fake_p, fake_g, fake_A} For Bob, I get it. {fake_B, iv_B, encrypted_B}
+I’ll try to read Bob’s message by changing. fake_g = 1 and and fake_p = 2 to fake_key = 1 for easy to solve
