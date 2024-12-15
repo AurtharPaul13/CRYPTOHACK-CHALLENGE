@@ -63,3 +63,43 @@ b = 1919572943691512325783103720167834163677411292709378502535498859989993544026
 A, p = int(A, 16), int(p, 16)
 shared_secret = pow(A, b, p)
 print(decrypt_flag(shared_secret, iv_A, encrypted_A))
+
+
+
+
+    About the server, after nc finished the process is the same, but according to desc, I know that Bob still uses p and and g I have to provide but will check all 3 parameters. p, g, A. After I try it:
+        g = g
+        p-1 > A > 2
+        p It needs to be strong, I don’t know what it means to be strong here, but it must be safe prime in the post. Diffie-Hellman Starter 3
+    One more thing, if it is still used. p and and g As above, Bob doesn’t change. B For B = g^b (mod p). I tried the number factor. p-1 and realize it has only 2 wishes is
+
+{2, 1205156213460516294276038011098783037428475274251229971327058470979054415841306114445046929130670807336613570738952006098251824478525291315971365353402504611531367372670536703348123007294680829887020513584624726600189364717085162921889329599071881596888429934762044470097788673059921772650773521873603874984881875042154463169647779984441228936206496905064565147296499973963182632029642323604865192473605840717232357219244260470063729922144429668263448160459816959}
+
+    As mentioned above, choosing safe primes can make the algorithm harder to apply (but that doesn’t mean it can’t).
+    Reality, when solving x in the equation g^x = h (mod p), Pohlig-Hellman's idea is the discrete logarithmic prize on the group where the element has a smaller level and then incorporates the results to find x - Reference. This is also the reason, if the number p Satisfactory p-1 As a smooth number, the algorithm will be done faster. Reference.
+    Smooth number: In the No. theory, some n It is called n-smooth number when there is no element of n bigger than it (wiss definition) but I don’t think it’s important. :penguin:. In this article, see the number. p is smooth number when its element estimates are very small compared to p-1.
+    I am allowed to change. p in the message sent to Bob and I will choose p' Two conditions:
+        p' It's safe prime: p' = 2*q + 1 with q is another element (but I also do not need to care whether it is the element or not because the number of genes below is also accepted by Bob :monkey:)
+        p'-1 is p'smooth number
+    Code to Gene Numbers p', I choose temporarily p' > p for strong enough:
+
+def find(p):
+    res = 1
+    i = 2
+    while res < p or not isPrime(res+1):
+        res *= i
+        i += 1
+    res += 1
+    return res
+# How fuck số to vch 
+# 21161033472192524829557170410776298658794639108376130676557783015578090330844472167861788371083170940722591241807108382859295872641348645166391260040395583908986502774347856154314632614857393087562331369896964916313777278292965202780626304839725254323083321245935920345445760469315716688808181386083935737705284353395869520861742156127496385090743602309049820934917134755461873012945704938955132724663075880436995904093654709349552656965610546540372048421026608925808493978164019986593442564905462745669412326023291812269608558332157759989142549649265359278848084868920655698461242425344000000000000000000000000000000000000000000000000000000000000000000000000000001
+
+    A get the number p' Ruffle, besides, I know. B = g ^ b (mod p') Should use discrete log find b It's ok:
+
+from sympy.ntheory.residue_ntheory import discrete_log
+
+b = discrete_log(fake_p, int(B, 16), int(g, 16))
+print(b)
+# 1919572943691512325783103720167834163677411292709378502535498859989993544026380143919501049584589675317643993465536543895780854808442293000014297210200227069779643763121704810281976733978781152126062646602812482025293137787739116693980988513420732289020477701182639042794562638875881378349771734410919106042203493166198706573467903966100368713572415175654342828296086659529676015616513470105470901979846373335352656586302787870238998914215908919919219987614105175
+
+    It seems b It didn’t change, now I’ll take the flag back
