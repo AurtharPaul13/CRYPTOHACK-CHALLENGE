@@ -37,3 +37,6 @@ key = mul(Q_A, b, E)[0]
 key = sha1(str(key).encode()).hexdigest()
 flag = 'crypto{?}'.replace('?', key)
 print(flag)
+
+
+We just need to apply the aimless volume of the previous post
