@@ -34,3 +34,8 @@ shared_secret = pow(B, a, p)
 
 s, i, e = shared_secret, hex(iv)[2:], hex(encrypted_flag)[2:]
 print(decrypt_flag(s, i, e))
+
+
+
+Alice and Bob will initially agree on the appropriate DH protocol, as DH64 is the protocol with key 64 bits of security so I will choose to attack. After a series of exchanges, I have the following parameters: {p, g, A, B, iv, encrypted_flag} and the task is to code. encrypted_flag equal to key 64 bit.
+To find key, I need to know a or b For A = pow(g, a, p) and and B = pow(g, b, p). This is related to discrete logarithm so I will perform on the sage
