@@ -1,89 +1,91 @@
-import re
-from Crypto.Hash import SHA256
-from Crypto.Util.number import bytes_to_long, long_to_bytes
-from utils import listener
-from pkcos1 import emsa_pkcs1_v15
-# from params import N, E, D
-
-FLAG = "crypto{?????????????????????????????????}"
-
-MSG = 'We are hyperreality and Jack and we own CryptoHack.org'
-DIGEST = emsa_pkcs1_v15.encode(MSG.encode(), 256)
-SIGNATURE = pow(bytes_to_long(DIGEST), D, N)
-
-
-class Challenge():
-    def __init__(self):
-        self.before_input = "This server validates domain ownership with RSA signatures. Present your message and public key, and if the signature matches ours, you must own the domain.\n"
-
-    def challenge(self, your_input):
-        if not 'option' in your_input:
-            return {"error": "You must send an option to this server"}
-
-        elif your_input['option'] == 'get_signature':
-            return {
-                "N": hex(N),
-                "e": hex(E),
-                "signature": hex(SIGNATURE)
-            }
-
-        elif your_input['option'] == 'verify':
-            msg = your_input['msg']
-            n = int(your_input['N'], 16)
-            e = int(your_input['e'], 16)
-
-            digest = emsa_pkcs1_v15.encode(msg.encode(), 256)
-            calculated_digest = pow(SIGNATURE, e, n)
-
-            if bytes_to_long(digest) == calculated_digest:
-                r = re.match(r'^I am Mallory.*own CryptoHack.org$', msg)
-                if r:
-                    return {"msg": f"Congratulations, here's a secret: {FLAG}"}
-                else:
-                    return {"msg": f"Ownership verified."}
-            else:
-                return {"error": "Invalid signature"}
-
-        else:
-            return {"error": "Invalid option"}
-
 from pwn import *
 from json import *
 from Crypto.Util.number import bytes_to_long
 from pkcs1 import emsa_pkcs1_v15
+from sage.all import Mod, discrete_log
 
-def send(hsh):
-    return r.sendline(dumps(hsh))
+HOST = 'socket.cryptohack.org'
+PORT = 13394
 
-def convert(txt):
-    return int(txt, 16)
+def send(msg):
+    return r.sendline(dumps(msg).encode())
 
-r = remote('socket.cryptohack.org', 13391)
-print(r.recv())
+def cvt(msg):
+    return bytes_to_long(emsa_pkcs1_v15.encode(msg.encode(), 768 // 8))
 
-option = {
-    'option': 'get_signature'
-}
+r = remote(HOST, PORT)
+r.recv()
+option = {'option': 'get_signature'}
 send(option)
-get = loads(r.recv())
-N, e, s = get["N"], get["e"], get["signature"]
-N, e, s = convert(N), convert(e), convert(s)
+s = int(loads(r.recv())['signature'], 16)
 
-msg = 'I am Mallory, I own CryptoHack.org'
-left = emsa_pkcs1_v15.encode(msg.encode(), 256)
-left = bytes_to_long(left)
-e = 1
-n = s - left
-assert left%n == s%n
+p, k = 2010103, 50
+n = p**k
 
-option = {
-    'option': 'verify',
-    'msg': msg,
-    'N': hex(n),
-    'e': hex(e),
-}
+option = {'option': 'set_pubkey', 'pubkey': hex(n)}
 send(option)
-get = loads(r.recv())
-flag = (get['msg'].split(':'))[1]
+suffix = loads(r.recv())['suffix']
+
+m1 = 'This is a test for a fake signature.' + suffix
+m2 = 'My name is Zupp and I own CryptoHack.org' + suffix
+m3 = 'Please send all my money to 3EovkHLK5kkAbE8Kpe53mkEbyQGjyf8ECw' + suffix
+
+msg1, msg2, msg3 = cvt(m1), cvt(m2), cvt(m3)
+s = Mod(s, n)
+msg1, msg2, msg3 = Mod(msg1, n), Mod(msg2, n), Mod(msg3, n)
+e1 = discrete_log(msg1, s)
+e2 = discrete_log(msg2, s)
+e3 = discrete_log(msg3, s)
+
+assert pow(s, e1, n) == msg1
+assert pow(s, e2, n) == msg2
+assert pow(s, e3, n) == msg3
+
+option1 = {
+    'option': 'claim',
+    'msg': m1,
+    'index': int(0),
+    'e': hex(e1)
+}
+send(option1)
+sec1 = bytes.fromhex(loads(r.recv())['secret'])
+
+option2 = {
+    'option': 'claim',
+    'msg': m2,
+    'index': int(1),
+    'e': hex(e2)
+}
+send(option2)
+sec2 = bytes.fromhex(loads(r.recv())['secret'])
+
+option3 = {
+    'option': 'claim',
+    'msg': m3,
+    'index': int(2),
+    'e': hex(e3)
+}
+send(option3)
+sec3 = bytes.fromhex(loads(r.recv())['secret'])
+
+flag = xor(sec1, sec2, sec3).decode()
 print(flag)
-      
+
+
+
+
+
+
+
+    Reading desc and the number of points, this song is definitely more difficult than the article Let's Decrypt. I need to know when the server released the flag, actually finished reading I do not know where it released the flag. :penguin:
+    Back to the post, this chall resembles chall first Let's Decrypt, also ask me to send the numbers n and and e, tell s (signature), so that m = pow(s, e, n). It's here. m In fact, it is 3 paragraphs, corresponding to the following:
+
+index = 0 --> This is a test for a fake signature.
+index = 1 --> My name is Zupp and I own CryptoHack.org
+index = 2 --> Please send all my money to 88830112005MBBank
+
+    So I need to find a way to find it again. e and and n corresponding satisfaction. Besides know flag have been xor with other secret paragraphs so I will send 3 paragraphs in turn m Up and xor to find. flag.
+    Source of attack algorithm reference in Here it isIn fact, the problem will be about to find e is the dlog of m In school mod n.
+    First, I will generate two numbers. p and and q, but actually only need to start once and the hat up several times (n = p^k) so that p It's smooth prime. Notes p It has to be some elements, so I will choose. p = 2010103 It is also due to the failure of multiple tests. :penguin:) and k = 50
+    With the n and and p Just started, I’ll definitely find it again. e In contrast, however, there is a problem in m3 is btc_check. The account must be a valid bitcoin address so I will create an address by This web (3EovkHLK5kkAbE8Kpe53mkEbyQGjyf8ECw)
+    Now take the flag in accordance with the procedure above is finished
