@@ -1,41 +1,4 @@
-from utils import listener
-from Crypto.Util.number import bytes_to_long, getPrime
-import random
-
-FLAG = b'crypto{???????????????????????????}'
-
-
-class Challenge():
-    def __init__(self):
-        self.before_input = "Come back as much as you want! You'll never get my flag.\n"
-        self.p = getPrime(1024)
-        self.q = getPrime(1024)
-        self.N = self.p * self.q
-        self.e = 11
-
-    def pad(self, flag):
-        m = bytes_to_long(flag)
-        a = random.randint(2, self.N)
-        b = random.randint(2, self.N)
-        return (a, b), a*m+b
-
-    def encrypt(self, flag):
-        pad_var, pad_msg = self.pad(flag)
-        encrypted = (pow(pad_msg, self.e, self.N), self.N)
-        return pad_var, encrypted
-
-    def challenge(self, your_input):
-        if not 'option' in your_input:
-            return {"error": "You must send an option to this server"}
-
-        elif your_input['option'] == 'get_flag':
-            pad_var, encrypted = self.encrypt(FLAG)
-            return {"encrypted_flag": encrypted[0], "modulus": encrypted[1], "padding": pad_var}
-
-        else:
-            return {"error": "Invalid option"}
-
-      from pwn import *
+from pwn import *
 from json import *
 
 def send(hsh):
@@ -69,6 +32,7 @@ print(f'{padding = }')
 print(f'{n = }')
 print(f'{e = }')
 
+
 from Crypto.Util.number import long_to_bytes
 
 enc = [7100471843638722289145167976606910159773138627423709595150798616816912608359586319306293257214081804010823296916273940791849973540111317677759409336871392368452501475423097005481973798772513132512108238910607226635988637953448918956558791314214147588373238958078150608219388374961536924967344309464270442318214989658627354998075057311939720175613834278397259987715228276202347028144867033469003848173009494204872529617410272037690826989674454532694289648440508753070511166587890116097675346856531360458183388798905732132355729884794843178592142055260682264344749466187293896166061696494864346905075145951040056156431, 1409748709950292874622277704193051118536706855123389331208988530884888555436254109679692049085268311429053834076971118583135611341883468934673085267942820066425649527174801697020835725274754643531146509498092617910493035467181903185821151745479788200950904368266164263860030134767872880687877738564114369722170823700449880902918643618815515584584512422873798284015144097351700927100292287659169848139113977881478760075225152849069522323005405533282746808568265798714820762139744558585479705078746190546772467653352371893182805560879813528837887710010117866032966437167674799907344414942300756008747447846856407166254]
@@ -87,3 +51,11 @@ p2 = (padding[1][0] * x + padding[1][1]) ^ e - enc[1]
 m = -gcd(p1, p2).coefficients()[0]
 flag = long_to_bytes(int(m)).decode()
 print(flag)
+
+
+
+
+When reading about padding and RSA, the first floating idea in his head is Coppersmith. Then let’s get it from Coppersmith, let’s analyze the source code a bit.
+After Nc with the server, we get it. n, encrypted_flag, padding. Part padding This consists of two numbers, a and and b. If re-reading the function encrypt will know encrypted_flag My is not pow(m, e, n) which is pow(a*m+b, e, n). This is a sign that we can use Coppersmith to calculate m, but not the Coppersmith Stereotyped Message because the equation is not munic.
+This is a form of Coppersmith, called Franklin–Reiter related-message attack..
+Since the sage does not allow using pwntools to nc with the server, we will divide into two stages, get the output and solve
