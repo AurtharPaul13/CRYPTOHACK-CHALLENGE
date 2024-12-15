@@ -1,7 +1,4 @@
-sdfN_ROUNDS = 10
-
-key        = b'\xc3,\\\xa6\xb5\x80^\x0c\xdb\x8d\xa5z*\xb6\xfe\\'
-ciphertext = b'\xd1O\x14j\xa4+O\xb6\xa1\xc4\x08B)\x8f\x12\xdd'
+from pwn import xor
 
 s_box = (
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
@@ -21,7 +18,6 @@ s_box = (
     0xE1, 0xF8, 0x98, 0x11, 0x69, 0xD9, 0x8E, 0x94, 0x9B, 0x1E, 0x87, 0xE9, 0xCE, 0x55, 0x28, 0xDF,
     0x8C, 0xA1, 0x89, 0x0D, 0xBF, 0xE6, 0x42, 0x68, 0x41, 0x99, 0x2D, 0x0F, 0xB0, 0x54, 0xBB, 0x16,
 )
-
 inv_s_box = (
     0x52, 0x09, 0x6A, 0xD5, 0x30, 0x36, 0xA5, 0x38, 0xBF, 0x40, 0xA3, 0x9E, 0x81, 0xF3, 0xD7, 0xFB,
     0x7C, 0xE3, 0x39, 0x82, 0x9B, 0x2F, 0xFF, 0x87, 0x34, 0x8E, 0x43, 0x44, 0xC4, 0xDE, 0xE9, 0xCB,
@@ -40,51 +36,31 @@ inv_s_box = (
     0xA0, 0xE0, 0x3B, 0x4D, 0xAE, 0x2A, 0xF5, 0xB0, 0xC8, 0xEB, 0xBB, 0x3C, 0x83, 0x53, 0x99, 0x61,
     0x17, 0x2B, 0x04, 0x7E, 0xBA, 0x77, 0xD6, 0x26, 0xE1, 0x69, 0x14, 0x63, 0x55, 0x21, 0x0C, 0x7D,
 )
+def inv_shift_rows(s):
+    s[0][1], s[1][1], s[2][1], s[3][1] = s[3][1], s[0][1], s[1][1], s[2][1]
+    s[0][2], s[1][2], s[2][2], s[3][2] = s[2][2], s[3][2], s[0][2], s[1][2]
+    s[0][3], s[1][3], s[2][3], s[3][3] = s[1][3], s[2][3], s[3][3], s[0][3]
 
 def add_round_key(s, k):
-    for i in range(4):
-        for j in range(4):
-            s[i][j]^=k[i][j]
+    return bytes2matrix(xor(s, k))
 
 def bytes2matrix(text):
-    """ Converts a 16-byte array into a 4x4 matrix.  """
     return [list(text[i:i+4]) for i in range(0, len(text), 4)]
-
 def matrix2bytes(matrix):
-    """ Converts a 4x4 matrix into a 16-byte array.  """
-    res = ""
-    for i in range(4):
-        for j in range(4):
-            res += chr(matrix[i][j])
-    return res
-
-def shift_rows(s):
-    s[0][1], s[1][1], s[2][1], s[3][1] = s[1][1], s[2][1], s[3][1], s[0][1]
-    s[0][2], s[1][2], s[2][2], s[3][2] = s[2][2], s[3][2], s[0][2], s[1][2]
-    s[0][3], s[1][3], s[2][3], s[3][3] = s[3][3], s[0][3], s[1][3], s[2][3]
-
-def inv_shift_rows(s):
-    s[1][1], s[2][1], s[3][1], s[0][1] = s[0][1], s[1][1], s[2][1], s[3][1]
-    s[2][2], s[3][2], s[0][2], s[1][2] = s[0][2], s[1][2], s[2][2], s[3][2]
-    s[3][3], s[0][3], s[1][3], s[2][3] = s[0][3], s[1][3], s[2][3], s[3][3]
-
+    return bytes(sum(matrix, []))
 xtime = lambda a: (((a << 1) ^ 0x1B) & 0xFF) if (a & 0x80) else (a << 1)
 
 def mix_single_column(a):
-    # see Sec 4.1.2 in The Design of Rijndael
     t = a[0] ^ a[1] ^ a[2] ^ a[3]
     u = a[0]
     a[0] ^= t ^ xtime(a[0] ^ a[1])
     a[1] ^= t ^ xtime(a[1] ^ a[2])
     a[2] ^= t ^ xtime(a[2] ^ a[3])
     a[3] ^= t ^ xtime(a[3] ^ u)
-
 def mix_columns(s):
     for i in range(4):
         mix_single_column(s[i])
-
 def inv_mix_columns(s):
-    # see Sec 4.1.3 in The Design of Rijndael
     for i in range(4):
         u = xtime(xtime(s[i][0] ^ s[i][2]))
         v = xtime(xtime(s[i][1] ^ s[i][3]))
@@ -95,76 +71,58 @@ def inv_mix_columns(s):
 
     mix_columns(s)
 
-def inv_sub_bytes(s):
-    for i in range(4):
-        for j in range(4):
-            s[i][j] = inv_s_box[s[i][j]]
+def sub_bytes(s, sbox=s_box):
+    s = sum(s, [])
+    for i in range(len(s)):
+        s[i] = sbox[s[i]]
+    return bytes(s)
+def inv_sub_bytes(s, sbox=inv_s_box):
+    return sub_bytes(s, sbox=inv_s_box)
 
 def expand_key(master_key):
-    """
-    Expands and returns a list of key matrices for the given master_key.
-    """
-    
-
-    # Round constants https://en.wikipedia.org/wiki/AES_key_schedule#Round_constants
     r_con = (
         0x00, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40,
         0x80, 0x1B, 0x36, 0x6C, 0xD8, 0xAB, 0x4D, 0x9A,
         0x2F, 0x5E, 0xBC, 0x63, 0xC6, 0x97, 0x35, 0x6A,
         0xD4, 0xB3, 0x7D, 0xFA, 0xEF, 0xC5, 0x91, 0x39,
     )
-
-    # Initialize round keys with raw key material.
     key_columns = bytes2matrix(master_key)
     iteration_size = len(master_key) // 4
-
-    # Each iteration has exactly as many columns as the key material.
     i = 1
     while len(key_columns) < (N_ROUNDS + 1) * 4:
-        # Copy previous word.   
         word = list(key_columns[-1])
-
-        # Perform schedule_core once every "row".
         if len(key_columns) % iteration_size == 0:
-            # Circular shift.
             word.append(word.pop(0))
-            # Map to S-BOX.
             word = [s_box[b] for b in word]
-            # XOR with first byte of R-CON, since the others bytes of R-CON are 0.
             word[0] ^= r_con[i]
             i += 1
         elif len(master_key) == 32 and len(key_columns) % iteration_size == 4:
-            # Run word through S-box in the fourth iteration when using a
-            # 256-bit key.
             word = [s_box[b] for b in word]
-
-        # XOR with equivalent word from previous iteration.
         word = bytes(i^j for i, j in zip(word, key_columns[-iteration_size]))
         key_columns.append(word)
 
-    # Group key words in 4x4 byte matrices.
     return [key_columns[4*i : 4*(i+1)] for i in range(len(key_columns) // 4)]
 
 def decrypt(key, ciphertext):
     round_keys = expand_key(key) # Remember to start from the last round key and work backwards through them when decrypting
-
-    # Convert ciphertext to state matrix
-    text = bytes2matrix(ciphertext)
-    # Initial add round key step
-    add_round_key(text, round_keys[10])
-
+    state = bytes2matrix(ciphertext)
+    state = add_round_key(state, round_keys[10])
     for i in range(N_ROUNDS - 1, 0, -1):
-        inv_shift_rows(text)
-        inv_sub_bytes(text)
-        add_round_key(text, round_keys[i])
-        inv_mix_columns(text)
-    # Run final round (skips the InvMixColumns step)
-    inv_shift_rows(text)
-    inv_sub_bytes(text)
-    add_round_key(text, round_keys[0])
-    # Convert state matrix to plaintext
+        inv_shift_rows(state)
+        state = inv_sub_bytes(state)
+        state = add_round_key(state, round_keys[i])
+        inv_mix_columns(state)
 
-    plaintext = matrix2bytes(text)
+    inv_shift_rows(state)
+    state = inv_sub_bytes(state)
+    state = add_round_key(state, round_keys[0])
+    plaintext = matrix2bytes(state)
     return plaintext
 
-print(decrypt(key, ciphertext))
+N_ROUNDS = 10
+key        = b'\xc3,\\\xa6\xb5\x80^\x0c\xdb\x8d\xa5z*\xb6\xfe\\'
+ciphertext = b'\xd1O\x14j\xa4+O\xb6\xa1\xc4\x08B)\x8f\x12\xdd'
+
+print(decrypt(key, ciphertext).decode())
+
+According to the suggestion of the article, we will perform the code-solving in the direction of the arrow which goes from Cipher text to Round 1 with key expansion and move to rounnd 2 with key expansion and move to Round n with key expansion then twe will get Plain text as output
