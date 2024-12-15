@@ -1,21 +1,3 @@
-from Crypto.Cipher import AES
-from Crypto.Util import Counter
-import random
-
-
-KEY = ?
-TEXT = ['???', '???', ..., FLAG]
-
-
-@chal.route('/stream_consciousness/encrypt/')
-def encrypt():
-    random_line = random.choice(TEXT)
-
-    cipher = AES.new(KEY, AES.MODE_CTR, counter=Counter.new(128))
-    encrypted = cipher.encrypt(random_line.encode())
-
-    return {"ciphertext": encrypted.hex()}
-
 from requests import *
 from json import *
 
@@ -34,6 +16,10 @@ for _ in range(1000):
 stream = sorted(stream, key=len)
 print(stream)
 
+
+
+code2:
+
 from pwn import xor
 from itertools import combinations
 
@@ -46,3 +32,7 @@ for comb in stream:
     temp = xor(bytes.fromhex(comb[0]), bytes.fromhex(comb[1]))[:len(flag)]
     res = xor(temp, flag)
     print(res)
+
+On the server only provides yourself with only one function is to get it. ctHowever, the special thing to note here is key and and counter It's reused.
+Then I came up with the idea of taking all of them. ct about analysis because key and and counter It's not too important anymore. Although I don't know how much there is. ct, but if taken 1000 times ct then the number can be predicted (here is 22), the code is first one above.
+In fact, reading this reminds me of a chall at CTFlearn: ALEXCTF CR2: Many times secrets. This Chall is doing it, it’s quite easy and in the form of guessing that has little to think. Go back to the post, know the CTR mode with key and and counter weak with X = D(key, counter)Here I will create the 2nd combination of 22 elements in the stream and and xor with each other, at the same time. xor with flag = b'crypto{' to exploit for what kind of 1 of 22 ct It's also that of flag: :
