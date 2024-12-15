@@ -1,69 +1,34 @@
-from Crypto.Cipher import AES
-import os
-from Crypto.Util.Padding import pad, unpad
-from datetime import datetime, timedelta
+import requests
+from json import loads
+from pwn import xor
 
-KEY = ?
-FLAG = ?
-
-@chal.route('/flipping_cookie/check_admin/<cookie>/<iv>/')
 def check_admin(cookie, iv):
+    cookie, iv = bytes.hex(cookie), bytes.hex(iv)
+    url = f"https://aes.cryptohack.org/flipping_cookie/check_admin/{cookie}/{iv}/"
+    r = requests.get(url)
+    flag = loads(r.text)
+    return flag
+
+def get_cookie():
+    url = "https://aes.cryptohack.org/flipping_cookie/get_cookie"
+    r = requests.get(url)
+    cookie = (loads(r.text))['cookie']
     cookie = bytes.fromhex(cookie)
-    iv = bytes.fromhex(iv)
+    return cookie
 
-    try:
-        cipher = AES.new(KEY, AES.MODE_CBC, iv)
-        decrypted = cipher.decrypt(cookie)
-        unpadded = unpad(decrypted, 16)
-    except ValueError as e:
-        return {"error": str(e)}
+temp = get_cookie()
+iv, cookie = temp[:16], temp[16:]
 
-    if b"admin=True" in unpadded.split(b";"):
-        return {"flag": FLAG}
-    else:
-        return {"error": "Only admin can read the flag"}
+block = b'admin=False;expi'
+fake_block = b'admin=True;expir'
+fake_iv = xor(fake_block, block, iv)
 
-@chal.route('/flipping_cookie/get_cookie/')
-def get_cookie():
-    expires_at = (datetime.today() + timedelta(days=1)).strftime("%s")
-    cookie = f"admin=False;expiry={expires_at}".encode()
+flag = check_admin(cookie, fake_iv)['flag']
+print(flag)
 
-    iv = os.urandom(16)
-    padded = pad(cookie, 16)
-    cipher = AES.new(KEY, AES.MODE_CBC, iv)
-    encrypted = cipher.encrypt(padded)
-    ciphertext = iv.hex() + encrypted.hex()
 
-    return {"cookie": ciphertext}
+We will observe the function get_cookie() Before. Function used for encoding cookie after pad, with the value of iv Mounted at the top. We can get value. cookie It's easy.
+We already know that CBC mode is clearly divided into 16 bytes, so here we have the first block: block = admin=False;expi,... Observe the function check_admin, the function will release the flag when satisfied b"admin=True" in unpadded.split(b";"). So, we just need to change. admin=False into admin=True It's over. However, in order to keep the length of the block and satisfy the conditions, we will use fake_block = b'admin=True;expir' (resight to one bytes b'r') to bypass padding conditions.
+In addition, we also need to create a fake_iv to bypass function unpad. We need to: ct_block = ct_fake.When there are two values cookie and and fake_iv, we have the flag
 
-def get_cookie():
-    url = "http://aes.cryptohack.org/flipping_cookie/get_cookie/"
-    r = requests.get(url)
-    js = r.json()
-    return bytes.fromhex(js["cookie"])
 
-def response(cookie, iv):
-    url = "http://aes.cryptohack.org/flipping_cookie/check_admin/"
-    url += cookie.hex()
-    url += "/"
-    url += iv.hex()
-    url += "/"
-    r = requests.get(url)
-    js = r.json()
-    print(js)
-
-def xor(a, b):
-    return long_to_bytes(bytes_to_long(a) ^ bytes_to_long(b))
-
-cookie = get_cookie()
-
-origin = b'admin=False;expi'
-goal = b'admin=True;\x05\x05\x05\x05\x05'
-
-iv = cookie[:16]
-block1 = cookie[16:32]
-block2 = cookie[32:]
-
-send_iv = xor(xor(origin, goal), iv)
-
-response(block1, send_iv)
