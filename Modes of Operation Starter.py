@@ -1,23 +1,21 @@
-from Crypto.Cipher import AES
+from requests import get
+from json import loads
 
-KEY = ?
-FLAG = ?
+def decrypt(ct):
+    url = f'https://aes.cryptohack.org/block_cipher_starter/decrypt/{ct}/'
+    r = get(url)
+    pt = (loads(r.text))['plaintext']
+    return bytes.fromhex(pt).decode()
 
-@chal.route('/block_cipher_starter/decrypt/<ciphertext>/')
-def decrypt(ciphertext):
-    ciphertext = bytes.fromhex(ciphertext)
-
-    cipher = AES.new(KEY, AES.MODE_ECB)
-    try:
-        decrypted = cipher.decrypt(ciphertext)
-    except ValueError as e:
-        return {"error": str(e)}
-
-    return {"plaintext": decrypted.hex()}
-
-@chal.route('/block_cipher_starter/encrypt_flag/')
 def encrypt_flag():
-    cipher = AES.new(KEY, AES.MODE_ECB)
-    encrypted = cipher.encrypt(FLAG.encode())
+    url = 'https://aes.cryptohack.org/block_cipher_starter/encrypt_flag/'
+    r = get(url)
+    ct = (loads(r.text))['ciphertext']
+    return ct
 
-    return {"ciphertext": encrypted.hex()}
+flag = decrypt(encrypt_flag())
+print(flag)
+
+
+
+We just need to give ciphertext in Encrypt_Flag into the function decrypt Available to receive plaintext. Translated through hex we get the flag. With this song, I don’t need to know. key to code because key reused in the function itself decrypt It's already
