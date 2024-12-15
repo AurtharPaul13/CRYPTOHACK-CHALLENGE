@@ -45,5 +45,8 @@ class Challenge():
         else:
             return {"error": "Invalid option"}
 
+
+This song is easier than the above. :penguin: Because I have an algorithm to solve it. It's just because it's Blinding Attack
+
       
           
