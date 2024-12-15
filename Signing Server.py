@@ -47,3 +47,8 @@ send(option)
 get = loads(r.recv())
 message = bytes.fromhex(get["signature"][2:])
 print(message.decode())
+
+
+
+After nc with the server, we can get it. N, e, secret, signature.
+However, if you read the source code, we really don’t need to count anything because the server has a value in the server. d It's already. Then just send it back. secret It's me with the flag
